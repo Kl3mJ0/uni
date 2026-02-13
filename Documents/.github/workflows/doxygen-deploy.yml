@@ -15,16 +15,30 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y doxygen
 
+      - name: Show repo tree (debug)
+        run: |
+          echo "ROOT:"
+          ls -la
+          echo "Documents:"
+          ls -la Documents || true
+          echo "Documents/worksheet5:"
+          ls -la Documents/worksheet5 || true
+
       - name: Run Doxygen
-        working-directory: ${{ github.workspace }}/Documents/worksheet5
+        working-directory: Documents/worksheet5
         run: doxygen
 
-      - name: Verify output
-        run: test -f ${{ github.workspace }}/Documents/worksheet5/html/index.html
+      - name: Show generated output (debug)
+        run: |
+          echo "Generated html folder:"
+          ls -la Documents/worksheet5/html || true
+          echo "Looking for index.html:"
+          find Documents/worksheet5 -maxdepth 3 -name "index.html" -print || true
+          test -f Documents/worksheet5/html/index.html
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.2.5
         with:
           branch: gh-pages
-          folder: ${{ github.workspace }}/Documents/worksheet5/html
+          folder: Documents/worksheet5/html
           clean: true
