@@ -1,0 +1,16 @@
+cmake_minimum_required (VERSION 3.12 FATAL_ERROR)
+project (calc)
+
+# Create a library named 'maths' from adder.cpp
+add_library (maths adder.cpp)
+
+# If building staticly, define maths_STATIC for the source code
+if (NOT BUILD_SHARED_LIBS)
+    add_definitions (-Dmaths_STATIC)
+endif ()
+
+# Create the executable from calc.cpp
+add_executable (calc calc.cpp)
+
+# Link the library to the executable
+target_link_libraries (calc maths)
