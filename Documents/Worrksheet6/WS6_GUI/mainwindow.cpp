@@ -113,30 +113,38 @@ void MainWindow::handleTreeClicked() {
 }
 void MainWindow::on_actionOpen_File_triggered()
 {
+    // Pick a file
     QString fileName = QFileDialog::getOpenFileName(
         this,
         tr("Open File"),
         "C:\\",
-        tr("STL Files (*.stl);;Text Files (*.txt);;All Files (*.*)")
+        tr("All Files (*.*)")
     );
 
     if (fileName.isEmpty())
         return;
 
-    // get selected tree item
+    // Must have a selected item in the tree
     QModelIndex index = ui->treeView->currentIndex();
     if (!index.isValid()) {
-        emit statusUpdateMessage("No item selected in tree", 0);
+        emit statusUpdateMessage("Select a tree item first", 0);
         return;
     }
 
-    // update NAME column (column 0) of selected row
-    QModelIndex nameIndex = index.sibling(index.row(), 0);
+    // Get the ModelPart behind the selected item
+    ModelPart* part = static_cast<ModelPart*>(index.internalPointer());
+    if (!part) return;
 
-    // Preferred: update through the model (triggers view refresh properly)
-    ui->treeView->model()->setData(nameIndex, QFileInfo(fileName).fileName(), Qt::EditRole);
+    // Rename the selected item (column 0 = Part name)
+    QString justName = QFileInfo(fileName).fileName();
+    part->set(0, justName);
 
-    emit statusUpdateMessage("Loaded: " + QFileInfo(fileName).fileName(), 0);
+    // Refresh the row in the view
+    QModelIndex left = index.sibling(index.row(), 0);
+    QModelIndex right = index.sibling(index.row(), 1);
+    emit partList->dataChanged(left, right);
+
+    emit statusUpdateMessage("Loaded: " + justName, 0);
 }
 void MainWindow::on_actionItem_Options_triggered()
 {
