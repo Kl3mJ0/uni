@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/Icons">
+        <file>open.png</file>
+        <file>control.png</file>
+        <file>setting.png</file>
+        <file>cogwheel.png</file>
+    </qresource>
+</RCC>
