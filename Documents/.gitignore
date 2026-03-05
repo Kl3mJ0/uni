@@ -1,0 +1,20 @@
+# CMake build outputs
+build/
+cmake-build*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+
+# Visual Studio generated files
+.vs/
+Debug/
+Release/
+x64/
+
+# Doxygen documentation output
+html/
+latex/
+
+# CPack packaging output
+_CPack_Packages/
