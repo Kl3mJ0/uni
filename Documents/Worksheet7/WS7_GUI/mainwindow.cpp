@@ -100,8 +100,10 @@ void MainWindow::handleOptionsButton()
         QModelIndex left = index.sibling(index.row(), 0);
         QModelIndex right = index.sibling(index.row(), 1);
         emit partList->dataChanged(left, right);
+        updateRender();
 
         emit statusUpdateMessage("Options saved", 0);
+
     }
 }
 void MainWindow::handleTreeClicked() {
@@ -140,25 +142,37 @@ void MainWindow::on_actionOpen_File_triggered()
         return;
     }
 
-    ModelPart* part = static_cast<ModelPart*>(index.internalPointer());
-    if (!part) return;
+    ModelPart* selectedPart = static_cast<ModelPart*>(index.internalPointer());
+    if (!selectedPart) return;
 
-    // 1) Load STL into that part
-    part->loadSTL(fileName);
-
-    // 2) Rename part in tree
     QString justName = QFileInfo(fileName).fileName();
-    part->set(0, justName);
 
-    // 3) Refresh tree view row
-    QModelIndex left = index.sibling(index.row(), 0);
-    QModelIndex right = index.sibling(index.row(), 1);
-    emit partList->dataChanged(left, right);
+    // If selected item is top-level (its parent is the root), add new child
+    if (selectedPart->parentItem() == partList->getRootItem())
+    {
+        ModelPart* newChild = new ModelPart({ justName, "true" });
+        newChild->loadSTL(fileName);
+        selectedPart->appendChild(newChild);
 
-    // 4) Re-render from the tree
+        partList->layoutChanged();
+        ui->treeView->expand(index);
+
+        emit statusUpdateMessage("Loaded STL as child: " + justName, 0);
+    }
+    else
+    {
+        // Otherwise edit the selected child itself
+        selectedPart->loadSTL(fileName);
+        selectedPart->set(0, justName);
+
+        QModelIndex left = index.sibling(index.row(), 0);
+        QModelIndex right = index.sibling(index.row(), 1);
+        emit partList->dataChanged(left, right);
+
+        emit statusUpdateMessage("Loaded STL into selected item: " + justName, 0);
+    }
+
     updateRender();
-
-    emit statusUpdateMessage("Loaded STL: " + justName, 0);
 }
 void MainWindow::on_actionItem_Options_triggered()
 {
@@ -182,12 +196,19 @@ void MainWindow::on_actionItem_Options_triggered()
         emit partList->dataChanged(left, right);
 
         emit statusUpdateMessage("Options saved", 0);
+        updateRender();
     }
 }
 void MainWindow::updateRender()
 {
     renderer->RemoveAllViewProps();
-    updateRenderFromTree(partList->index(0, 0, QModelIndex()));
+
+    int rows = partList->rowCount(QModelIndex());
+    for (int i = 0; i < rows; i++)
+    {
+        updateRenderFromTree(partList->index(i, 0, QModelIndex()));
+    }
+
     renderer->ResetCamera();
     renderWindow->Render();
 }

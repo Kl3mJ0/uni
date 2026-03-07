@@ -17,7 +17,7 @@ void option::loadFromPart(ModelPart* part)
     if (!part) return;
 
     ui->lineEditName->setText(part->data(0).toString());
-    ui->checkVisible->setChecked(part->data(1).toString() == "true");
+    ui->checkVisible->setChecked(part->visible());
 
     ui->spinR->setValue(part->getColourR());
     ui->spinG->setValue(part->getColourG());
@@ -29,7 +29,11 @@ void option::saveToPart(ModelPart* part)
     if (!part) return;
 
     part->set(0, ui->lineEditName->text());
-    part->set(1, ui->checkVisible->isChecked() ? "true" : "false");
+
+    bool isChecked = ui->checkVisible->isChecked();
+
+    part->setVisible(isChecked);
+    part->set(1, isChecked ? "true" : "false");
 
     part->setColour(
         static_cast<unsigned char>(ui->spinR->value()),

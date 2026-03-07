@@ -12,6 +12,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
 #include <vtkPolyData.h>
+#include <vtkProperty.h>
 
 
 /* Commented out for now, will be uncommented later when you have
@@ -104,6 +105,14 @@ void ModelPart::setColour(const unsigned char R, const unsigned char G, const un
     colourR = R;
     colourG = G;
     colourB = B;
+
+    if (actor) {
+        actor->GetProperty()->SetColor(
+            colourR / 255.0,
+            colourG / 255.0,
+            colourB / 255.0
+        );
+    }
 }
 
 unsigned char ModelPart::getColourR()
@@ -124,6 +133,10 @@ unsigned char ModelPart::getColourB()
 void ModelPart::setVisible(bool v)
 {
     isVisible = v;
+
+    if (actor) {
+        actor->SetVisibility(v ? 1 : 0);
+    }
 }
 
 bool ModelPart::visible()
@@ -195,6 +208,14 @@ void ModelPart::loadSTL(const QString& fileName)
 
     actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper(mapper);
+
+    actor->GetProperty()->SetColor(
+        colourR / 255.0,
+        colourG / 255.0,
+        colourB / 255.0
+    );
+
+    actor->SetVisibility(isVisible ? 1 : 0);
 }
 
 vtkSmartPointer<vtkActor> ModelPart::getActor() const
